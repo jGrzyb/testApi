@@ -7,10 +7,9 @@ public class Program {
     public static HttpClient client = new HttpClient();
 
     public static void Main(string[] args) {
-        GetToken(new User("u2", "p2")).Wait();
-        Console.WriteLine(token);
+        GetToken(new User("u1", "p1")).Wait();
 
-        User u2 = new User(1, "u2", "p2");
+        User u2 = new User(1, "u1", "p1");
         putUser(1, u2).Wait();
 
         List<User> users = GetUsers().Result.ToList();
@@ -24,9 +23,11 @@ public class Program {
         if(response.IsSuccessStatusCode) {
             var content = await response.Content.ReadAsStringAsync();
             token = JsonSerializer.Deserialize<List<string>>(content)![0];
+            Console.WriteLine("Token: YES");
             return token;
         }
         else {
+            Console.WriteLine("Token: NO");
             return response.StatusCode.ToString();
         }
     }
@@ -50,7 +51,6 @@ public class Program {
             password = user.password
         });
         var data = new StringContent(json, Encoding.UTF8, "application/json");
-        Console.WriteLine(json);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var response = await client.PutAsync($"http://localhost:5000/api/user/{id}", data);
         if(response.IsSuccessStatusCode) {
@@ -77,34 +77,3 @@ public class Program {
     }
 
 }
-
-// using (var client = new HttpClient()) {
-//     string token = "";
-//     User user = new User("u1", "p1");
-//     string json = JsonSerializer.Serialize(user);
-//     var data = new StringContent(json, Encoding.UTF8, "application/json");
-//     var response = await client.PostAsync("http://localhost:5000/api/auth", data);
-//     if(response.IsSuccessStatusCode) {
-//         var content = await response.Content.ReadAsStringAsync();
-//         token = JsonSerializer.Deserialize<List<string>>(content)![0];
-//         Console.WriteLine(token);
-//     }
-//     else {
-//         Console.WriteLine(response.StatusCode);
-//     }
-
-//     for(int i=0; i<5; i++) {
-//         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-//         response = await client.GetAsync("user");
-//         if(response.IsSuccessStatusCode) {
-//             var content = await response.Content.ReadAsStringAsync();
-//             var users = JsonSerializer.Deserialize<List<User>>(content) ?? new List<User>();
-//             users.ForEach(user => Console.WriteLine(user.ToString()));
-//             Console.WriteLine(2*i + "   " + content);
-//         }
-//         else {
-//             Console.WriteLine("Error");
-//         }
-//         Thread.Sleep(500);
-//     }
-// }
